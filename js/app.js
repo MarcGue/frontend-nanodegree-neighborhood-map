@@ -9,12 +9,11 @@ var AppViewModel = function() {
     };
 
     this.search = function(formElement) {
-        // ajax(this.searchValue());
         var searchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + this.searchValue() + '&key=AIzaSyAM-2JC_5a5CDvXU_mWH5exAUO9HC1mbhg';
 
         $.ajax({
             url: searchUrl,
-            dataType: 'jsonp',
+            dataType: 'json',
             success: function(data) {
                 console.log(data);
             }
