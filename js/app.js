@@ -13,7 +13,7 @@ var AppViewModel = function() {
 
         $.ajax({
             url: searchUrl,
-            dataType: 'json',
+            dataType: 'jsonp',
             success: function(data) {
                 console.log(data);
             }
