@@ -1,24 +1,39 @@
-var AppViewModel = function() {
-    
-    this.isSearchControl = ko.observable(true);
-    this.searchValue = ko.observable();
-    
-    
-    this.showSearchControl = function() {
-        this.isSearchControl(!this.isSearchControl());
-    };
+(function () {
 
-    this.search = function(formElement) {
-        var searchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' + this.searchValue() + '&key=AIzaSyAM-2JC_5a5CDvXU_mWH5exAUO9HC1mbhg';
+    var AppViewModel = function () {
 
-        $.ajax({
-            url: searchUrl,
-            dataType: 'jsonp',
-            success: function(data) {
-                console.log(data);
-            }
+        this.map = new google.maps.Map(document.getElementById('map'), {
+            center: {
+                lat: 52.4271833,
+                lng: 13.4518913
+            },
+            zoom: 15,
+            mapTypeControl: false,
+            panControl: false,
+            fullscreenControl: false,
+            zoomControlOptions: {
+                style: google.maps.ZoomControlStyle.SMALL
+            },
+            streetViewControl: false
         });
-    };
-};
 
-ko.applyBindings(new AppViewModel());
+        // this.placesService = new google.maps.places.PlacesService(map);
+        this.geocoder = new google.maps.Geocoder();
+
+
+        this.isSearchControl = ko.observable(true);
+        this.searchValue = ko.observable();
+
+        this.showSearchControl = function () {
+            this.isSearchControl(!this.isSearchControl());
+        };
+
+        this.search = function (formElement) {
+            this.geocoder.geocode( { 'address': 'Kirschner Weg 13, Berlin'}, function(results, status) {
+                console.log(results);
+            });
+        };
+    };
+
+    ko.applyBindings(new AppViewModel());
+})();
