@@ -14,7 +14,8 @@
 </head>
 
 <body>
-    <div id="map"></div>
+    <!--<div id="map"></div>-->
+    <div id="map" data-bind="map: cheerMap"></div>
 
     <div class="col-6 offset-6 text-right" id="map-controls">
         <button class="btn btn-secondary btn-sm" data-bind="click: showSearchControl"><i class="fa fa-search"></i></button>
@@ -23,7 +24,7 @@
     <div class="col-6 offset-6 text-right" id="search-control" data-bind="visible: isSearchControl">
         <form class="form-inline float-right" data-bind="submit: search">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search for..." data-bind="value: searchValue">
+                <input type="text" class="form-control" placeholder="Location..." data-bind="value: searchValue">
                 <span class="input-group-btn">
                   <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
                 </span>
