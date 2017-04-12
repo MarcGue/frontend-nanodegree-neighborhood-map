@@ -3,8 +3,9 @@
     var AppViewModel = function () {
         // store this to the variable self
         var self = this;
-        // indicate wether to show the searchbar or not
+        // indicate whether to show the searchbar or not
         self.isSearchVisible = ko.observable(true);
+        // indicate whether to show the resultbox or not
         self.isResultBoxVisible = ko.observable(true);
         // store the given search value
         self.searchValue = ko.observable('Berlin');
@@ -16,15 +17,28 @@
 
         self.cheerMap = ko.observable(self.currentLocation());
 
+        /**
+         * Show or hide the search box 
+         */
         self.showSearch = function () {
             self.isSearchVisible(!self.isSearchVisible());
         };
 
+        /**
+         * Show or hide the result box
+         */
         self.showResultBox = function () {
-            !self.isResultBoxVisible(!self.isResultBoxVisible())
+            self.isResultBoxVisible(!self.isResultBoxVisible());
         };
 
-        self.search = function (formElement) {
+        /**
+         * Search will call the Google Maps APIs' Geocoder to search for the given searchValue.
+         * The Geocoder will return an array of results as well as the status of this search.
+         * We will save the location of the first item in the results array to set the new location
+         * to our map. After this we take the location to call the Google Map Places API to query
+         * for Cheerleading around that location. For every result we put a Marker on our map.
+         */
+        self.search = function () {
             self.cheerMap().geocoder.geocode({
                 'address': this.searchValue()
             }, function (results, status) {
@@ -34,19 +48,19 @@
                     location: self.cheerMap().googleMap.center,
                     radius: 500,
                     query: 'Cheerleading'
-                }, callback);
+                }, self.placesCallback);
             });
         };
 
-        function callback(results, status) {
+        self.placesCallback = function (results, status) {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                for (var i = 0; i < results.length; i++) {
-                    createMarker(results[i]);
-                }
+                results.forEach(function (result) {
+                    self.createMarker(result);
+                });
             }
-        }
+        };
 
-        function createMarker(place) {
+        self.createMarker = function (place) {
             var placeLoc = place.geometry.location;
             var marker = new google.maps.Marker({
                 map: self.cheerMap().googleMap,
@@ -57,7 +71,7 @@
                 self.cheerMap().infowindow.setContent(place.name);
                 self.cheerMap().infowindow.open(self.cheerMap().googleMap, this);
             });
-        }
+        };
     };
 
     ko.bindingHandlers.map = {
