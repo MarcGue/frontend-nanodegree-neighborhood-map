@@ -34,10 +34,10 @@
     </div>
 
     <div class="col-9 offset-3 col-md-5 offset-md-7" id="result-panel" data-bind="visible: isResultBoxVisible">
-        <div class="col-12 result-container">
-            <h3 class="result-title">Test</h3>
+        <div class="col-12 result-container" data-bind="foreach: searchResults">
+            <h3 class="result-title" data-bind="text: name">Test</h3>
             <div class="result-content">
-                <p>lorem ipsum lorem ipsum lorem ipsum</p>
+                <p data-bind="text: formatted_address">lorem ipsum lorem ipsum lorem ipsum</p>
             </div>
         </div>
     </div>

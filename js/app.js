@@ -10,12 +10,16 @@
         // store the given search value
         self.searchValue = ko.observable('Berlin');
 
+        self.searchResults = ko.observableArray();
+
         self.currentLocation = ko.observable({
             lat: ko.observable(52.52000659999999),
             lng: ko.observable(13.404953999999975)
         });
 
         self.cheerMap = ko.observable(self.currentLocation());
+
+        self.markers = ko.observableArray();
 
         /**
          * Show or hide the search box 
@@ -46,22 +50,31 @@
                 self.cheerMap().googleMap.setCenter(self.currentLocation());
                 self.cheerMap().placesService.textSearch({
                     location: self.cheerMap().googleMap.center,
-                    radius: 500,
-                    query: 'Cheerleading'
+                    radius: 5000,
+                    query: 'Cheerleading in ' + self.searchValue()
                 }, self.placesCallback);
             });
         };
 
         self.placesCallback = function (results, status) {
+            self.searchResults.removeAll();
+            clearMarkers();
+            self.markers.removeAll();
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                results.forEach(function (result) {
-                    self.createMarker(result);
+                createSearchResult(results);
+                self.searchResults().forEach(function (result) {
+                    self.markers.push(createMarker(result));
                 });
+            } else {
+                results = [{
+                    name: 'Es wurden keine Ergebnisse gefunden',
+                    formatted_address: ''
+                }];
+                createSearchResult(results);
             }
         };
 
-        self.createMarker = function (place) {
-            var placeLoc = place.geometry.location;
+        function createMarker(place) {
             var marker = new google.maps.Marker({
                 map: self.cheerMap().googleMap,
                 position: place.geometry.location
@@ -71,7 +84,21 @@
                 self.cheerMap().infowindow.setContent(place.name);
                 self.cheerMap().infowindow.open(self.cheerMap().googleMap, this);
             });
-        };
+
+            return marker;
+        }
+
+        function clearMarkers() {
+            self.markers().forEach(function (marker) {
+                marker.setMap(null);
+            });
+        }
+
+        function createSearchResult(results) {
+            results.forEach(function (result) {
+                self.searchResults.push(result);
+            });
+        }
     };
 
     ko.bindingHandlers.map = {

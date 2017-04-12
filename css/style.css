@@ -28,12 +28,17 @@ html, body {
     background-color: #fff;
     border: 1px solid rgba(0,0,0,.15);
     border-radius: .25rem;
+    max-height: 450px;
+    overflow-y: scroll;
+    padding-bottom: 15px;
 }
 
 .result-title {
     font-size: 15px;
+    padding-top: 15px;
 }
 
 .result-content {
     font-size: 13px;
+    border-bottom: 1px solid rgba(0,0,0,.15);
 }
