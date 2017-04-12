@@ -34,6 +34,12 @@
     </div>
 
     <div class="col-9 offset-3 col-md-4 offset-md-8" id="result-panel" data-bind="visible: isResultBoxVisible">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Filter...">
+            <span class="input-group-btn">
+                <button class="btn btn-success" type="submit"><i class="fa fa-filter"></i></button>
+            </span>
+        </div>
         <div class="col-12 result-container" data-bind="foreach: searchResults">
             <h3 class="result-title" data-bind="text: name">Test</h3>
             <div class="result-content">

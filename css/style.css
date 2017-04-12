@@ -11,12 +11,12 @@ body {
 
 #search-panel {
     position: absolute;
-    top: 45px;
+    top: 50px;
 }
 
 #result-panel {
     position: absolute;
-    top: 95px;
+    top: 105px;
 }
 
 #map {
@@ -29,7 +29,7 @@ body {
     background-color: #fff;
     border: 1px solid rgba(0, 0, 0, .15);
     border-radius: .25rem;
-    max-height: 450px;
+    max-height: 420px;
     overflow-y: scroll;
     padding-bottom: 15px;
 }

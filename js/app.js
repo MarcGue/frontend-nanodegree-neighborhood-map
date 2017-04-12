@@ -56,6 +56,10 @@
             });
         };
 
+        self.filterResults = function () {
+            console.log('filter');
+        };
+
         self.placesCallback = function (results, status) {
             self.searchResults.removeAll();
             clearMarkers();
