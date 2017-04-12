@@ -4,9 +4,10 @@
         // store this to the variable self
         var self = this;
         // indicate wether to show the searchbar or not
-        self.isSearchControl = ko.observable(true);
+        self.isSearchVisible = ko.observable(true);
+        self.isResultBoxVisible = ko.observable(true);
         // store the given search value
-        self.searchValue = ko.observable();
+        self.searchValue = ko.observable('Berlin');
 
         self.currentLocation = ko.observable({
             lat: ko.observable(52.52000659999999),
@@ -14,6 +15,28 @@
         });
 
         self.cheerMap = ko.observable(self.currentLocation());
+
+        self.showSearch = function () {
+            self.isSearchVisible(!self.isSearchVisible());
+        };
+
+        self.showResultBox = function () {
+            !self.isResultBoxVisible(!self.isResultBoxVisible())
+        };
+
+        self.search = function (formElement) {
+            self.cheerMap().geocoder.geocode({
+                'address': this.searchValue()
+            }, function (results, status) {
+                self.currentLocation(results[0].geometry.location);
+                self.cheerMap().googleMap.setCenter(self.currentLocation());
+                self.cheerMap().placesService.textSearch({
+                    location: self.cheerMap().googleMap.center,
+                    radius: 500,
+                    query: 'Cheerleading'
+                }, callback);
+            });
+        };
 
         function callback(results, status) {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
@@ -35,24 +58,6 @@
                 self.cheerMap().infowindow.open(self.cheerMap().googleMap, this);
             });
         }
-
-        this.showSearchControl = function () {
-            this.isSearchControl(!this.isSearchControl());
-        };
-
-        this.search = function (formElement) {
-            self.cheerMap().geocoder.geocode({
-                'address': this.searchValue()
-            }, function (results, status) {
-                self.currentLocation(results[0].geometry.location);
-                self.cheerMap().googleMap.setCenter(self.currentLocation());
-                self.cheerMap().placesService.textSearch({
-                    location: self.cheerMap().googleMap.center,
-                    radius: 500,
-                    query: 'Cheerleading'
-                }, callback);
-            });
-        };
     };
 
     ko.bindingHandlers.map = {
@@ -79,5 +84,7 @@
         },
     };
 
-    ko.applyBindings(new AppViewModel());
+    var appViewModel = new AppViewModel();
+    ko.applyBindings(appViewModel);
+    appViewModel.search();
 })();

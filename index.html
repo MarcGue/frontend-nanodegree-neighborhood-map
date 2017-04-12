@@ -17,12 +17,13 @@
     <!--<div id="map"></div>-->
     <div id="map" data-bind="map: cheerMap"></div>
 
-    <div class="col-6 offset-6 text-right" id="map-controls">
-        <button class="btn btn-secondary btn-sm" data-bind="click: showSearchControl"><i class="fa fa-search"></i></button>
+    <div class="col-6 offset-6 text-right" id="control-panel">
+        <button class="btn btn-secondary btn-sm" data-bind="click: showSearch"><i class="fa fa-search"></i></button>
+        <button class="btn btn-secondary btn-sm" data-bind="click: showResultBox"><i class="fa fa-list"></i></button>
     </div>
 
-    <div class="col-6 offset-6 text-right" id="search-control" data-bind="visible: isSearchControl">
-        <form class="form-inline float-right" data-bind="submit: search">
+    <div class="col-9 offset-3 col-md-5 offset-md-7" id="search-panel" data-bind="visible: isSearchVisible">
+        <form class="form-inline" data-bind="submit: search">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Location..." data-bind="value: searchValue">
                 <span class="input-group-btn">
@@ -30,6 +31,15 @@
                 </span>
             </div>
         </form>
+    </div>
+
+    <div class="col-9 offset-3 col-md-5 offset-md-7" id="result-panel" data-bind="visible: isResultBoxVisible">
+        <div class="col-12 result-container">
+            <h3 class="result-title">Test</h3>
+            <div class="result-content">
+                <p>lorem ipsum lorem ipsum lorem ipsum</p>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
