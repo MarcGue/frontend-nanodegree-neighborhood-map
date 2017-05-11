@@ -14,8 +14,7 @@
 </head>
 
 <body>
-    <!--<div id="map"></div>-->
-    <div id="map" data-bind="map: cheerMap"></div>
+    <div id="map"></div>
 
     <div class="col-6 offset-6 text-right" id="control-panel">
         <button class="btn btn-secondary btn-sm" data-bind="click: showSearch"><i class="fa fa-search"></i></button>
@@ -40,10 +39,22 @@
                 <button class="btn btn-success" type="submit"><i class="fa fa-filter"></i></button>
             </span>
         </div>
-        <div class="col-12 result-container" data-bind="foreach: searchResults">
-            <h3 class="result-title" data-bind="text: name">Test</h3>
+        <div class="result-container" data-bind="foreach: { data: searchResults, as: 'searchResult' }">
+            <h3 class="result-title" data-bind="text: searchResult.name"></h3>
             <div class="result-content">
-                <p data-bind="text: formatted_address">lorem ipsum lorem ipsum lorem ipsum</p>
+                <ul data-bind="foreach: {data: searchResult.videos, as: 'video' }">
+                    <li >
+                        <div class="result-list-left">
+                            <img data-bind="attr: {src: video.thumb}">
+                        </div>
+                        <div class="result-list-right">
+                            <h3>
+                                <a class="fancybox fancybox.iframe" data-bind="attr: {href: video.videoId, title: video.title}, text: video.title"></a>
+                            </h3>
+                            <p data-bind="text: video.desc"></p>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
