@@ -25,8 +25,7 @@ body {
 }
 
 .result-container {
-    padding-top: 10px;
-    padding-bottom: 15px;
+    padding: 10px 10px 15px 10px;
     background-color: #fff;
     border: 1px solid rgba(0, 0, 0, .15);
     border-radius: .25rem;
@@ -41,24 +40,30 @@ body {
 
 .result-content {
     font-size: 13px;
-    border-bottom: 1px solid rgba(0, 0, 0, .15);
+}
+
+.result-list {
+    padding: 10px 0;
+    border-bottom: 1px #ccc dotted;
+    list-style: none;
+    overflow: auto;
 }
 
 .result-list-left {
     float: left;
-    width: 20%;
+    width: 25%;
 }
 
 .result-list-left img {
     width: 100%;
     padding: 3px;
-    border: solid #ccc 1px;
 }
 
 .result-list-right {
     float: right;
-    width: 78%;
+    width: 73%;
 }
+
 .result-list-right h3 {
     font-size: 1rem;
 }

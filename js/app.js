@@ -10,7 +10,7 @@
     var SearchResult = function () {
         this.name = ko.observable();
         this.formatted_address = ko.observable();
-        this.marker = ko.observable();
+        this.markerLocation = ko.observable();
         this.videos = ko.observableArray();
     };
 
@@ -50,6 +50,9 @@
         // initialize searchValue with 'Berlin'
         self.searchValue = ko.observable('Berlin');
 
+        // initialize filterValue
+        self.filterValue = ko.observable();
+
         self.searchResults = ko.observableArray();
 
         /**
@@ -71,6 +74,8 @@
          */
         self.search = function () {
             self.searchResults.removeAll();
+            self.removeAllMarkers();
+            self.filterValue('');
             self.cheerMap.geocoder.geocode({
                 address: self.searchValue()
             }, self.callBackGeoCoder);
@@ -92,12 +97,8 @@
          * TODO 
          */
         self.callBackPlacesService = function (results, status) {
-            self.removeAllMarkers();
             if (status === google.maps.places.PlacesServiceStatus.OK) {
                 results.forEach(function (result) {
-                    searchResult = new SearchResult();
-                    searchResult.name = result.name;
-                    searchResult.formatted_address = result.formatted_address;
                     
                     // TODO call another API to get additional information
                     $.get('https://www.googleapis.com/youtube/v3/search', {
@@ -106,6 +107,11 @@
                         type: 'video',
                         key: 'AIzaSyAM-2JC_5a5CDvXU_mWH5exAUO9HC1mbhg'
                     }, function(data) {
+                        searchResult = new SearchResult();
+                        searchResult.name = result.name;
+                        searchResult.formatted_address = result.formatted_address;
+                        searchResult.markerLocation = result.geometry.location;
+
                         data.items.forEach(function(item, index) {
                             if (index > 2) {
                                 return;
@@ -120,10 +126,9 @@
                             searchResult.videos.push(video);
                         });
 
+                        self.searchResults.push(searchResult);
+                        self.markers.push(self.createMarker(searchResult));
                     });
-
-                    self.searchResults.push(searchResult);
-                    self.markers.push(self.createMarker(result));
                 });
             }
         };
@@ -134,67 +139,58 @@
         self.createMarker = function (result) {
             var marker = new google.maps.Marker({
                 map: self.cheerMap.map,
-                position: result.geometry.location
+                position: result.markerLocation
             });
 
             google.maps.event.addListener(marker, 'click', function () {
-                self.cheerMap.infowindow.setContent(result.name);
+                self.cheerMap.infowindow.setContent(createInfoWindowContent(result));
                 self.cheerMap.infowindow.open(self.cheerMap.map, this);
             });
 
             return marker;
         };
 
-        self.createSearchResult = function (place) {
-            return {
-                name: place.name,
-                description: place.formatted_address,
-                html: function () {
-                    return '<h3 class="result-title">' + this.name + '</h3><div class="result-content"><p>' + this.description + '</p></div>';
-                }
-            };
-        };
-
         /**
          * TODO
          */
         self.removeAllMarkers = function () {
-            return function () {
+            // return function () {
                 // loop over every marker and set its map to null
-                self.markers.forEach(function (marker) {
+                self.markers().forEach(function (marker) {
                     marker.setMap(null);
                 });
 
                 // remove all markers from the array
                 self.markers.removeAll();
-            };
+            // };
         };
 
-
-
-        self.filterResults = function () {
-            console.log('filter');
+        self.createMarkers = function (results) {
+            self.removeAllMarkers();
+            results.forEach(function(result) {
+                self.markers.push(self.createMarker(result));
+            });
         };
 
-        // self.placesCallback = function (results, status) {
-        //     self.searchResults.removeAll();
-        //     clearMarkers();
-        //     self.markers.removeAll();
-        //     if (status === google.maps.places.PlacesServiceStatus.OK) {
-        //         createSearchResult(results);
-        //         self.searchResults().forEach(function (result) {
-        //             self.markers.push(createMarker(result));
-        //         });
-        //     } else {
-        //         results = [{
-        //             name: 'Es wurden keine Ergebnisse gefunden',
-        //             formatted_address: ''
-        //         }];
-        //         createSearchResult(results);
-        //     }
-        // };
+        self.filteredResults = ko.computed(function () {
+            if (!self.filterValue()) {
+                self.createMarkers(self.searchResults());
+                return self.searchResults();
+            } else {
+                var results = ko.utils.arrayFilter(self.searchResults(), function(result) {
+                    return result.name.search(self.filterValue()) > -1;
+                });
 
+                self.createMarkers(results);
+                return results;
+            }
+        });
+    
         self.search();
+    };
+
+    createInfoWindowContent = function (searchResult) {
+        return '<h6>' + searchResult.name + '</h6><small>' + searchResult.formatted_address + '</small>';
     };
 
     ko.applyBindings(new AppViewModel());
