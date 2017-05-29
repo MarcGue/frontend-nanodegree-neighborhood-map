@@ -14,57 +14,32 @@
 </head>
 
 <body>
-    <div id="map"></div>
-
-    <div class="col-6 offset-6 text-right" id="control-panel">
-        <button class="btn btn-secondary btn-sm" data-bind="click: showSearch"><i class="fa fa-search"></i></button>
-        <button class="btn btn-secondary btn-sm" data-bind="click: showResultBox"><i class="fa fa-list"></i></button>
-    </div>
-
-    <div class="col-9 offset-3 col-md-4 offset-md-8" id="search-panel" data-bind="visible: isSearchVisible">
-        <form class="form-inline" data-bind="submit: search">
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Location..." data-bind="value: searchValue">
-                <span class="input-group-btn">
-                  <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
-                </span>
-            </div>
-        </form>
-    </div>
-
-    <div class="col-9 offset-3 col-md-4 offset-md-8" id="result-panel" data-bind="visible: isResultBoxVisible">
-        <div class="input-group">
-            <input type="text" class="form-control" placeholder="Filter..." data-bind="value: filterValue">
-            <span class="input-group-btn">
-                <button class="btn btn-success" type="submit"><i class="fa fa-filter"></i></button>
-            </span>
-        </div>
-        <div class="result-container" data-bind="foreach: { data: filteredResults, as: 'searchResult' }">
-            <h3 class="result-title" data-bind="text: searchResult.name"></h3>
-            <small data-bind="text: searchResult.formatted_address"></small>
-            <div class="result-content">
-
-                <!-- TODO css an bootstrap 4 anpassen, da aktuell bootstrap 3 implementiert ist -->
-                <ul class="result-list" data-bind="foreach: {data: searchResult.videos, as: 'video' }">
-                    <li>
-                        <div class="result-list-left">
-                            <img data-bind="attr: {src: video.thumb}">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6 col-md-4">
+                <div class="locations">
+                    <div class="filter">
+                        <div class="input-group">
+                            <input type="text" class="form-control" data-bind="textInput: filterValue, valueUpdate: 'afterkeydown'">
+                            <span class="input-group-btn">
+                                <button class="btn btn-success"><i class="fa fa-filter"></i></button>
+                            </span>
                         </div>
-                        <div class="result-list-right">
-                            <h3>
-                                <a class="fancybox fancybox.iframe" data-bind="attr: {href: video.videoId, title: video.title}, text: video.title"></a>
-                            </h3>
-                            <p data-bind="text: video.desc"></p>
+                    </div>
+                    <div class="filteredLocations">
+                        <div class="list-group" data-bind="foreach: filteredLocations">
+                            <a class="list-group-item list-group-item-action flex-column align-items-start" data-bind="text: title, click: $parent.highlightMarker($data, event)"></a>
                         </div>
-                    </li>
-                    <div class="clearfix"></div>
-                </ul>
+                    </div>
+                </div>
             </div>
+            <div class="col-sm-6 col-md-8" id="map"></div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAM-2JC_5a5CDvXU_mWH5exAUO9HC1mbhg&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAM-2JC_5a5CDvXU_mWH5exAUO9HC1mbhg&libraries=places&callback=initMap"
+        async defer></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/tether.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
