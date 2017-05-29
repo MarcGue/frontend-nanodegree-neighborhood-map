@@ -8,6 +8,8 @@ Download or clone this repository
 
     https://github.com/MarcGue/frontend-nanodegree-neighborhood-map
 
+- Navigate to your project's folder and open the index.html with your prefered browser
+
 ## How to use
 - You can filter the given locations by its name
 - By clicking an item on the list a infowindow with some information will show up on the map

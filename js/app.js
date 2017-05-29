@@ -100,6 +100,7 @@ function Location(locationData, map, infowindow) {
     self.marker.setMap(self.map);
     // Add click listener to the marker
     self.marker.addListener('click', function () {
+        self.map.setCenter(self.marker.postion);
         populateInfowindow(self);
         bounceMarker(self);
     });
@@ -211,7 +212,7 @@ function bounceMarker(location) {
         location.marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function () {
             location.marker.setAnimation(null);
-        }, 2500);
+        }, 1400);
     }
 }
 
@@ -220,4 +221,8 @@ function bounceMarker(location) {
  */
 function initMap() {
     ko.applyBindings(new AppViewModel());
+}
+
+function handleMapError() {
+    alert('An error occured by loading the map. Please try again');
 }
