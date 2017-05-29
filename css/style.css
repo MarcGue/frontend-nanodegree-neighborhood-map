@@ -4,19 +4,9 @@ body {
     height: 100%;
 }
 
-#control-panel {
+#control-bar {
     position: absolute;
-    top: 10px;
-}
-
-#search-panel {
-    position: absolute;
-    top: 50px;
-}
-
-#result-panel {
-    position: absolute;
-    top: 105px;
+    top: 0px;
 }
 
 #map {
@@ -24,46 +14,15 @@ body {
     height: 100%;
 }
 
-.result-container {
-    padding: 10px 10px 15px 10px;
-    background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, .15);
-    border-radius: .25rem;
-    max-height: 420px;
-    overflow-y: scroll;
+.container-fluid {
+    height: 100%;
 }
 
-.result-title {
-    font-size: 15px;
-    padding-top: 15px;
+.row {
+    height: 100%;
 }
 
-.result-content {
-    font-size: 13px;
-}
-
-.result-list {
-    padding: 10px 0;
-    border-bottom: 1px #ccc dotted;
-    list-style: none;
-    overflow: auto;
-}
-
-.result-list-left {
-    float: left;
-    width: 25%;
-}
-
-.result-list-left img {
-    width: 100%;
-    padding: 3px;
-}
-
-.result-list-right {
-    float: right;
-    width: 73%;
-}
-
-.result-list-right h3 {
-    font-size: 1rem;
+.locations {
+    padding-bottom: 10px;
+    padding-top: 10px;
 }

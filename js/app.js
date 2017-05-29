@@ -1,197 +1,147 @@
-(function () {
+'use strict';
 
-    var YouTubeVideo = function (videoId, title, thumb, desc) {
-        this.videoId = videoId;
-        this.title = title;
-        this.thumb = thumb;
-        this.desc = desc;
-    };
+var fsquareClientId = 'CNOWHNKFA2JKEKZ12FCHNC1WRP2WTM2JKTXAEIVXQ1X24SBJ';
+var fsquareClientSecrect = '52DX2KBYRNGDGWJZ244TTCANOJVO3TRGIERMZ5KGE5OAEFP2';
 
-    var SearchResult = function () {
-        this.name = ko.observable();
-        this.formatted_address = ko.observable();
-        this.markerLocation = ko.observable();
-        this.videos = ko.observableArray();
-    };
+var initialLocations = [
+    {title: 'Gropius Passagen', location: {lat: 52.4295793, lng: 13.4546777}},
+    {title: 'Potsdamer Platz Arkaden', location: {lat: 52.5078631, lng: 13.3738804}},
+    {title: 'ALEXA', location: {lat: 52.519903, lng: 13.4147787}},
+    {title: 'LP12 Mall of Berlin', location: {lat: 52.5104228, lng: 13.3810472}},
+    {title: 'Kaufhaus des Westens', location: {lat: 52.5016021, lng: 13.340993}},
+    {title: 'Spandau Arcaden', location: {lat: 52.5339545, lng: 13.1962588}},
+    {title: 'Tempelhofer Hafen Berlin', location: {lat: 52.4555581, lng: 13.3858547}}
+];
 
-    var CheerMap = function () {
-        var self = this;
-        self.options = {
-            zoom: 10,
-            mapTypeControl: false,
-            panControl: false,
-            fullscreenControl: false,
-            zoomControlOptions: {
-                style: google.maps.ZoomControlStyle.SMALL
-            },
-            streetViewControl: false
-        };
-        self.map = new google.maps.Map(document.getElementById('map'), self.options);
-        self.geocoder = new google.maps.Geocoder();
-        self.infowindow = new google.maps.InfoWindow();
-        self.placesService = new google.maps.places.PlacesService(self.map);
-    };
 
-    var AppViewModel = function () {
-        var self = this;
+function Location(locationData, map, infowindow) {
+    // Store this to self
+    var self = this;
+    // Store the map
+    self.map = map;
+    // Store the infowindow
+    self.infowindow = infowindow;
+    // Store the title from the locationData
+    self.title = locationData.title;
+    // Store the position from the location array
+    self.position = locationData.location;
+    // Store the url of the location
+    self.url = '';
+    // Store the street of the location
+    self.street = '';
+    // Store the zipcode of the location
+    self.zipcode = '';
+    // Build the url for making an ajax call to FourSquare
+    var fsquareUrl = getFSquareUrl(self.title, self.position);
+    // Make an ajax call to FourSquare about the location
+    $.getJSON(fsquareUrl).done(function(data) {
+        var firstResult = data.response.venues[0];
+        self.url = firstResult.url;
+        self.street = firstResult.location.formattedAddress[0];
+        self.zipcode = firstResult.location.formattedAddress[1];
+    }).fail(function() {
+        alert('Error on calling FourSquare API');
+    });
+    // Create a marker with the title and position
+    self.marker = new google.maps.Marker({
+        title: self.title,
+        position: self.position,
+        animation: null
+    });
+    // Set the map to the marker
+    self.marker.setMap(self.map);
+    // Add click listener to the marker
+    self.marker.addListener('click', function() {
+        populateInfowindow(self);
+        bounceMarker(self);
+    });
+}
 
-        // initialize the CheerMap
-        self.cheerMap = new CheerMap();
+function AppViewModel() {
+    var self = this;
 
-        // initialize the markers as an empty observableArray
-        self.markers = ko.observableArray();
+    self.map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 11,
+        center: {lat: 52.520008, lng: 13.404954}
+	});
+    self.geocoder = new google.maps.Geocoder();
+    self.infowindow = new google.maps.InfoWindow();
+    self.placesService = new google.maps.places.PlacesService(self.map);
 
-        // set isSearchVisible to true by default
-        self.isSearchVisible = ko.observable(true);
+    self.filterValue = ko.observable('');
 
-        // set isResultBoxVisible to true by default
-        self.isResultBoxVisible = ko.observable(true);
+    self.locations = ko.observableArray();
+    initialLocations.forEach(function(initialLocation) {
+        self.locations.push(new Location(initialLocation, self.map, self.infowindow));
+    });
 
-        // initialize searchValue with 'Berlin'
-        self.searchValue = ko.observable('Berlin');
-
-        // initialize filterValue
-        self.filterValue = ko.observable();
-
-        self.searchResults = ko.observableArray();
-
-        /**
-         * Show or hide the search box 
-         */
-        self.showSearch = function () {
-            self.isSearchVisible(!self.isSearchVisible());
-        };
-
-        /**
-         * Show or hide the result box
-         */
-        self.showResultBox = function () {
-            self.isResultBoxVisible(!self.isResultBoxVisible());
-        };
-
-        /**
-         * TODO
-         */
-        self.search = function () {
-            self.searchResults.removeAll();
-            self.removeAllMarkers();
-            self.filterValue('');
-            self.cheerMap.geocoder.geocode({
-                address: self.searchValue()
-            }, self.callBackGeoCoder);
-        };
-
-        /**
-         * TODO
-         */
-        self.callBackGeoCoder = function (results, status) {
-            self.cheerMap.map.setCenter(results[0].geometry.location);
-            self.cheerMap.placesService.textSearch({
-                location: self.cheerMap.map.center,
-                radius: 5000,
-                query: 'Cheerleading in ' + self.searchValue()
-            }, self.callBackPlacesService);
-        };
-
-        /** 
-         * TODO 
-         */
-        self.callBackPlacesService = function (results, status) {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                results.forEach(function (result) {
-                    
-                    // TODO call another API to get additional information
-                    $.get('https://www.googleapis.com/youtube/v3/search', {
-                        part: 'snippet, id',
-                        q: result.name,
-                        type: 'video',
-                        key: 'AIzaSyAM-2JC_5a5CDvXU_mWH5exAUO9HC1mbhg'
-                    }, function(data) {
-                        searchResult = new SearchResult();
-                        searchResult.name = result.name;
-                        searchResult.formatted_address = result.formatted_address;
-                        searchResult.markerLocation = result.geometry.location;
-
-                        data.items.forEach(function(item, index) {
-                            if (index > 2) {
-                                return;
-                            }
-
-                            var videoId = 'http://www.youtube.com/embed/' + item.id.videoId;
-                            var title = item.snippet.title;
-                            var thumb = item.snippet.thumbnails.high.url;
-                            var desc = item.snippet.description;
-                            video = new YouTubeVideo(videoId, title, thumb, desc);
-
-                            searchResult.videos.push(video);
-                        });
-
-                        self.searchResults.push(searchResult);
-                        self.markers.push(self.createMarker(searchResult));
-                    });
-                });
-            }
-        };
-
-        /**
-         * TODO
-         */
-        self.createMarker = function (result) {
-            var marker = new google.maps.Marker({
-                map: self.cheerMap.map,
-                position: result.markerLocation
+    self.filteredLocations = ko.computed(function () {
+        if (!self.filterValue()) {
+            self.locations().forEach(function (loc) {
+                loc.marker.setMap(self.map);
+            });
+            return self.locations();
+        } else {
+            var results = ko.utils.arrayFilter(self.locations(), function (locationItem) {
+                return locationItem.title.toLowerCase().search(self.filterValue().toLowerCase()) > -1;
             });
 
-            google.maps.event.addListener(marker, 'click', function () {
-                self.cheerMap.infowindow.setContent(createInfoWindowContent(result));
-                self.cheerMap.infowindow.open(self.cheerMap.map, this);
+            self.locations().forEach(function (loc) {
+                loc.marker.setMap(null);
             });
 
-            return marker;
-        };
-
-        /**
-         * TODO
-         */
-        self.removeAllMarkers = function () {
-            // return function () {
-                // loop over every marker and set its map to null
-                self.markers().forEach(function (marker) {
-                    marker.setMap(null);
-                });
-
-                // remove all markers from the array
-                self.markers.removeAll();
-            // };
-        };
-
-        self.createMarkers = function (results) {
-            self.removeAllMarkers();
-            results.forEach(function(result) {
-                self.markers.push(self.createMarker(result));
+            results.forEach(function (result) {
+                result.marker.setMap(self.map);
             });
-        };
 
-        self.filteredResults = ko.computed(function () {
-            if (!self.filterValue()) {
-                self.createMarkers(self.searchResults());
-                return self.searchResults();
-            } else {
-                var results = ko.utils.arrayFilter(self.searchResults(), function(result) {
-                    return result.name.search(self.filterValue()) > -1;
-                });
+            return results;
+        }
+    });
 
-                self.createMarkers(results);
-                return results;
-            }
+    self.highlightMarker = function(location, event) {
+        if (event !== undefined && 'click' === event.type) {
+            google.maps.event.trigger(location.marker, 'click');
+        }
+    };
+}
+
+function getFSquareUrl(title, position) {
+    var lat = position.lat;
+    var lng = position.lng;
+    return 'https://api.foursquare.com/v2/venues/search?ll='+ lat + ',' + lng + '&client_id=' + fsquareClientId + '&client_secret=' + fsquareClientSecrect + '&v=20170525&query=' + title;
+}
+
+function populateInfowindow(location) {
+    if (location.infowindow.marker != location.marker) {
+        // Clear the content of the infowindow
+        location.infowindow.setContent('');
+        // Set the new marker to the infowindow
+        location.infowindow.marker = location.marker;
+        // Add closeclick listener to the infowindow
+        location.infowindow.addListener('closeclick', function() {
+            location.infowindow.marker = null;
         });
-    
-        self.search();
-    };
+        // Set the content to the infowindow
+        location.infowindow.setContent('<h5>' + location.title + '</h5>' + 
+        '<a href="' + location.url + '">' + location.url + '</a>' + 
+        '<div>' + location.street + '</div>' +
+        '<div>' + location.zipcode + '</div>');
+        // Open the infowindow on the correct marker
+        location.infowindow.open(location.map, location.marker);
+    }
+}
 
-    createInfoWindowContent = function (searchResult) {
-        return '<h6>' + searchResult.name + '</h6><small>' + searchResult.formatted_address + '</small>';
-    };
+function bounceMarker(location) {
+    if (location.marker.getAnimation() !== null) {
+        location.marker.setAnimation(null);
+    } else {
+        location.marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function() {
+            location.marker.setAnimation(null);
+        }, 2500);
+    }
+}
 
+function initMap() {
     ko.applyBindings(new AppViewModel());
-})();
+}
